@@ -56,8 +56,65 @@ passport.use(new localStrategy((username, password, done) => {
     });
 }));
 
-app.get('/', (req, res) => {
+const isLoggedIn = (req, res, next) => {
+    if (req.isAuthenticated()) return next();
+    res.redirect("/login")
+}
+
+const isLoggedOut = (req, res, next) => {
+    if (!req.isAuthenticated()) return next();
+    res.redirect("/")
+}
+
+app.get('/', isLoggedIn, (req, res) => {
    res.render("index",{title: "Home"}) 
+});
+
+
+app.get('/login', isLoggedOut, (req, res) => {
+    const content = {
+        title: "Login",
+        error: req.query.error
+    }
+    res.render('login', content);
+});
+
+app.post("/login", passport.authenticate('local', {
+    successRedirect: "/",
+    failureRedirect:"/login?error=true"
+}));
+
+app.get("/logout", (req, res) => {
+    req.logOut();
+    res.redirect("/login");
+});
+
+//setup our admin
+app.get('/setup', async(req, res) => {
+    const exists = await User.exists({ username: 'admin' });
+    if (exists) {
+        console.log(exists, "exists");
+        res.redirect("/login");
+        return;
+    }
+
+    bcrypt.genSalt(10, function (err, salt){
+        if(err) {
+            return next(err);
+        }
+
+        bcrypt.hash('pass', salt, function (err, hash){
+            if(err) return next(err);
+            const newAdmin = new User({
+                username: 'admin',
+                password: hash,
+            });
+            newAdmin.save();
+
+            res.redirect("/login");
+        });
+    });
+
 });
 app.listen(PORT, () => {
     console.log(`Server running on ${PORT}`);
