@@ -1,14 +1,14 @@
-const passport = require('passport');
-const Strategy = require('passport-local');
-const bcrypt = require('bcrypt');
-const User = require('../models/user');
+import passport from 'passport';
+import { Strategy } from 'passport-local';
+import bcrypt from 'bcrypt';
+import UserModal from '../models/user';
 
-module.exports = function () {
+export default function () {
     /**
      * Configure the local  strategy
      */
-    passport.use(new Strategy((username, password, done) => {
-        User.findOne({ username: username }, (err, user) => {
+    passport.use(new Strategy((username: string, password: string, done: any) => {
+        UserModal.findOne({ username: username }, (err, user) => {
             if (err) return done(err);
             if (!user) return done(null, false, { message: 'Incorrect Username' });
             bcrypt.compare(password, user.password, (err, res) => {
@@ -24,9 +24,9 @@ module.exports = function () {
         done(null, user.id);
     });
     passport.deserializeUser((id, done) => {
-        User.findById(id, (err, user) => {
+        UserModal.findById(id, (err: any, user: any) => {
             done(err, user);
         });
     });
-    
+
 }

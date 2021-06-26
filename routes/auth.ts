@@ -1,9 +1,9 @@
-const express = require('express');
-const passport = require('passport');
+import  * as express from 'express';
+import  passport from 'passport';
 
 const router = express.Router();
 
-router.get('/login', (req, res, next) => {
+router.get('/login', (req:express.Request, res:express.Response, next) => {
     res.render('login');
 });
 router.post('/login/password', passport.authenticate('local', {
@@ -16,4 +16,4 @@ router.get('/logout', (req, res, next) => {
     res.redirect("/");
 })
 
-module.exports = router;
+export default router;

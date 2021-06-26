@@ -1,17 +1,17 @@
-const express = require('express');
-const bcrypt = require('bcrypt');
+import  * as express from 'express';
+import  bcrypt from 'bcrypt';
 const router = express.Router();
 
-const User = require('../models/user')
+import  UserModal from '../models/user'
 
 /* List User */
-router.get('/new',  async (req, res, next) => {
+router.get('/new',  async (req:express.Request, res: express.Response, next) => {
     res.render("signup");
 });
 
-router.post("/", async (req, res, next) => {
-    const { username, password } = req.body;
-    const exists = await User.exists({ username });
+router.post("/", async (req:express.Request, res: express.Response, next) => {
+    const { username, password }: User = req.body;
+    const exists:boolean = await UserModal.exists({ username });
     if (exists) {
         res.redirect("/new?error=error");
         return;
@@ -22,11 +22,11 @@ router.post("/", async (req, res, next) => {
         }
         bcrypt.hash(password, salt, function (err, hash) {
             if (err) return next(err);
-            const newAdmin = new User({
+            const user = new UserModal({
                 username,
                 password: hash,
             });
-            newAdmin.save();
+            user.save();
             req.login(user, function (err) {
                 if (err) { return next(err); }
                 res.redirect('/');
@@ -34,4 +34,4 @@ router.post("/", async (req, res, next) => {
         });
     })
 });
-module.exports = router;
+export default router;
